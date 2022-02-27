@@ -12,6 +12,7 @@ require('dotenv').config()
 
 app.use(cors())
 app.use(bodyParser.urlencoded({extended:false}))
+app.use(bodyParser.json())
 app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
@@ -39,48 +40,48 @@ let arrayOfClients = [{username: 'matt', duration: 28 , description:['Push-ups',
 //     if (error) return console.log(error)
 // })
 
-app.post('/api/users/:username', (req, res) => {
+app.post('/api/users', (req, res) => {
   let userToPost = req.body.username
   let idToResponse;
   let CreateOneUser = (done) => {
-    let newUser = new user({username: userToPost});
-    newUser.save(function(error, data){
+    User.create({username: userToPost},function(error, data){
       if (error) return console.log(error)
-      done(null, data)
+      //done(null, data)
+      console.log(typeof userToPost)
     })
+    
+    
   }
-  User.find({username:/matt/i}, '_id',(error, data) => {
-    if (error) return console.log(error)
-    console.log('entre en la busqueda')
-    idToResponse = data;
-  })
+  CreateOneUser();
+  // User.find({username:/matt/i}, '_id',(error, data) => {
+  //   if (error) return console.log(error)
+  //   console.log('entre en la busqueda')
+  //   idToResponse = data;
+  // })
+  let foundNewUser =  User.exists({ name: /mate/i })
   res.json({
-      username:  req.body.username,
-      _id: idToResponse //id de la conexion con mongo
+      "username":  req.body.username,
+      "_id": 'JSON.stringify(foundNewUser)' //id de la conexion con mongo
   })
 })
 
-app.post('/api/users', (req, res) => {
-  
+app.get('/api/users', (req, res) => {
   User.find({}, '_id, username',(error, data) => {
     if (error) return console.log(error)
     console.log('entre en la busqueda2')
-    // idToResponse = data;
     res.json({
-      username:  req.body.username,
-      _id: data //id de la conexion con mongo
+       data //id de la conexion con mongo
     })
-  })
-  
+  })  
 })
 
-app.get('/api/users', (req,res) => {
-  res.json({
-    hola:'hola'
-    //mostrar todo los usuario registrados en un array
-    //[{user,_id},{},{},{},]
-  })
-})
+// app.get('/api/users', (req,res) => {
+//   res.json({
+//     hola:'hola'
+//     //mostrar todo los usuario registrados en un array
+//     //[{user,_id},{},{},{},]
+//   })
+// })
 
 app.post('/api/users/:_id/exercises', (req, res) => {
   res.json({
