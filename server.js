@@ -12,7 +12,7 @@ require('dotenv').config()
 
 app.use(cors())
 app.use(bodyParser.urlencoded({extended:false}))
-app.use(bodyParser.json())
+// app.use(bodyParser.json())
 app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
@@ -58,11 +58,19 @@ app.post('/api/users', (req, res) => {
   //   console.log('entre en la busqueda')
   //   idToResponse = data;
   // })
-  let foundNewUser =  User.exists({ name: /mate/i })
-  res.json({
+  // let foundUser = User.exists({ username: /mate/i })
+  User.findOne({username: userToPost}, '_id',(error, idNewUser) => {
+    if (error) return console.log(error)
+    console.log('entre en la busqueda2')
+    res.json({
       "username":  req.body.username,
-      "_id": 'JSON.stringify(foundNewUser)' //id de la conexion con mongo
-  })
+      idNewUser //id de la conexion con mongo
+    })
+  }) 
+  // res.json({
+  //     "username":  req.body.username,
+  //     "id": User.exists({ username: /mate/i })//id de la conexion con mongo
+  // })
 })
 
 app.get('/api/users', (req, res) => {
