@@ -43,67 +43,67 @@ let arrayOfClients = [{username: 'matt', duration: 28 , description:['Push-ups',
 app.post('/api/users', (req, res) => {
   let userToPost = req.body.username
   let idToResponse;
-  let CreateOneUser = (done) => {
+  let CreateOneUser = () => {
     User.create({username: userToPost},function(error, data){
       if (error) return console.log(error)
-      //done(null, data)
-      console.log(typeof userToPost)
+      console.log('se ha creado un nuevo usuario')
     })
-    
-    
   }
   CreateOneUser();
-  // User.find({username:/matt/i}, '_id',(error, data) => {
-  //   if (error) return console.log(error)
-  //   console.log('entre en la busqueda')
-  //   idToResponse = data;
-  // })
-  // let foundUser = User.exists({ username: /mate/i })
+  //se crea un usuario nuevo (puede ser repetido)
+  //se busca en db si hay algun nombre con el input y se muestra el id
   User.findOne({username: userToPost}, '_id',(error, idNewUser) => {
     if (error) return console.log(error)
     console.log('entre en la busqueda2')
-    res.json({
-      "username":  req.body.username,
-      idNewUser //id de la conexion con mongo
-    })
+    if (idNewUser){
+      res.json({
+        "username": req.body.username,
+        "_id": idNewUser._id 
+      })
+    }else{
+      res.json({
+        "username": req.body.username,
+        "_id": 'no encontrado, se ha creado un nuevo usuario'
+      })
+    }  
   }) 
-  // res.json({
-  //     "username":  req.body.username,
-  //     "id": User.exists({ username: /mate/i })//id de la conexion con mongo
-  // })
 })
 
 app.get('/api/users', (req, res) => {
   User.find({}, '_id, username',(error, data) => {
     if (error) return console.log(error)
     console.log('entre en la busqueda2')
-    res.json({
-       data //id de la conexion con mongo
-    })
+    res.json(data)
   })  
 })
 
-// app.get('/api/users', (req,res) => {
-//   res.json({
-//     hola:'hola'
-//     //mostrar todo los usuario registrados en un array
-//     //[{user,_id},{},{},{},]
-//   })
-// })
 
 app.post('/api/users/:_id/exercises', (req, res) => {
+  let exercises = req.body.description
+  let id = req.body[':_id']
+  let duration = req.body.duration
+  let date = req.body.date
+  if (!date) {
+    // date = new Date(Date.now()).toLocaleString()
+    let today = new Date()
+    date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+  }
+  //validar si el id no es null, check db for the exercises list for that id, then res user object with the exercise fields added
+  console.log(id,exercises)
   res.json({
-      username:  req.body.username,
-      _id: 'x'//id de la conexion con mongo
-    // will be the user object with the exercise fields added.
+    "duration":  duration,
+    'id': id,
+    'exercises': exercises,
+    'date': date
+    
   })
 })
 
-app.get('/api/users/:_id/exercises', (req,res) => {
-  res.json({
-    //devolver un log de cualquier id de usuario
-  })
-})
+// app.get('/api/users/:_id/exercises', (req,res) => {
+//   res.json({
+//     //devolver un log de cualquier id de usuario
+//   })
+// })
 
 app.get('/api/users/:_id/logs', (req, res) => {
   // user{count excercises per user}
