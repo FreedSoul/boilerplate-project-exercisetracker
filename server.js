@@ -179,13 +179,6 @@ app.get('/api/users/:_id/logs', (req, res) => {
         console.log('ha ocurrido un error en la busqueda(logs) o data es null', error)
       }else{
         queryObj = { username: data.username }
-        if(from !== undefined && to !== undefined){
-          queryObj.date  = { $gte: new Date(from) , $lte: new Date(to)}
-        }else if(from !== undefined && to === undefined){
-          queryObj.date = { $gte: new Date(from) }
-        }else if(from === undefined && to !== undefined){
-          queryObj.date = { $lte: new Date(to) }
-        }
         console.log(queryObj)
 
                 
@@ -194,13 +187,14 @@ app.get('/api/users/:_id/logs', (req, res) => {
                     console.log('hubo un error => ', err)
                   }else{
                     let exerciseList = []
-                    exerciseList = result.map((item) => {
-                      return {
-                        "description": item.description,
-                        "duration": item.duration,
-                        "date": item.date
-                      }
-                    })
+                    let queryTo = new Date(from)
+                    let queryFrom = new Date(to)
+                    console.log('este es from '+queryFrom.toDateString()+" este es to "+ queryTo.toDateString())
+                    exerciseList = result.filter((item) => {
+                      let dbDate = new Date(item.date);
+                      console.log(dbDate.toDateString())
+                      return ((dbDate > queryFrom) || (dbDate < queryTo))?(console.log('hola')) : item
+                    }).map(item => ({"description": item.description, "duration": item.duration, "date": item.date }))
                     
                     let aux = new Log({
                       'username': data.username,
